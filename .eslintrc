@@ -1,0 +1,22 @@
+{
+    "env": {
+        "es2021": true
+    },
+      "extends": "airbnb-base",
+      "rules": {
+        "no-underscore-dangle": [
+          "error",
+          {
+            "allow": [
+              "_id"
+            ]
+          }
+        ],
+        "no-useless-escape":"off",
+        "max-len":"off",
+        "no-console":"off",
+        "no-unused-vars": "off",
+        "arrow-body-style":"off",
+        "consistent-return":"off"
+      }
+    }
