@@ -53,18 +53,16 @@ const createMovie = (req, res, next) => {
 
 const deleteMovie = (req, res, next) => {
   const { _id } = req.params;
-  Movie.findById(req.params._id)
+  Movie.findById(_id)
     .then((movie) => {
-      if (!movie) {
+      if (movie === null) {
         throw new NotFoundError(`Фильм ${_id} не найден`);
       }
-      if (String(movie.owner) === req.user._id) {
-        movie.deleteOne()
-          .then(() => res.send({ message: `Фильм ${_id} удалён` }))
-          .catch((err) => next(err));
-      } else {
-        next(new ConflictError());
+      if (movie.owner.toHexString() !== req.user._id) {
+        throw new ConflictError('Нельзя удалять чужие фильмы.');
       }
+      movie.deleteOne();
+      return res.send({ message: `Фильм ${_id} удалён.` });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
