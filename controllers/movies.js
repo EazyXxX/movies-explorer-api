@@ -51,26 +51,27 @@ const createMovie = (req, res, next) => {
     });
 };
 
-const deleteMovie = async (req, res, next) => {
+const deleteMovie = (req, res, next) => {
   const { _id } = req.params;
-  try {
-    const movie = await Movie.findById(_id);
-    if (movie === null) {
-      throw new NotFoundError(`Фильм ${_id} не найден`);
-    }
-    if (movie.owner.toHexString() !== req.user._id) {
-      throw new ConflictError('Нельзя удалять чужие фильмы');
-    }
-
-    await movie.deleteOne();
-    return res.send({ message: `Фильм ${_id} удалён` });
-  } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
+  Movie.findById(_id)
+    .then((movie) => {
+      if (movie === null) {
+        throw new NotFoundError(`Фильм ${_id} не найден`);
+      }
+      if (movie.owner.toHexString() !== req.user._id) {
+        throw new ConflictError('Нельзя удалять чужие фильмы.');
+      }
+      movie.deleteOne();
+      return res.send({ message: `Фильм ${_id} удалён.` });
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        console.error(err);
+        return next(new BadRequestError('Передан некорректный id фильма'));
+      }
       console.error(err);
-      return next(new BadRequestError('Передан некорректный id фильма'));
-    }
-    return next(err);
-  }
+      return next(err);
+    });
 };
 
 module.exports = {
